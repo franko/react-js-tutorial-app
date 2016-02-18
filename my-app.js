@@ -14,10 +14,10 @@ var ContactItem = React.createClass({
 	},
 
 	render: function() {
-		return React.createElement('li', {},
-			React.createElement('h2', {}, this.props.name),
-			React.createElement('a', {href: "mailto:" + this.props.email}, this.props.email),
-			React.createElement('div', {}, this.props.description)
+		return React.createElement('li', {className: 'ContactItem'},
+			React.createElement('h2', {className: 'ContactItem-name'}, this.props.name),
+			React.createElement('a', {className: 'ContactItem-email', href: "mailto:" + this.props.email}, this.props.email),
+			React.createElement('div', {className: 'ContactItem-description'}, this.props.description)
 		);
 	}
 });
@@ -29,7 +29,7 @@ var ContactForm = React.createClass({
 
 	render: function() {
 		var contact = this.props.contact;
-		return React.createElement('form', {},
+		return React.createElement('form', {className: 'ContactForm'},
 			React.createElement('input', {type: 'text', placeholder: 'Name (required)', value: contact.name}),
 			React.createElement('input', {type: 'email', placeholder: 'Email', value: contact.email}),
 			React.createElement('textarea', {placeholder: 'Description', value: contact.description}),
@@ -45,9 +45,9 @@ var ContactView = React.createClass({
 	},
 
 	render: function() {
-		return React.createElement('div', {},
-			React.createElement('h1', {}, "Contacts"),
-			React.createElement('ul', {},
+		return React.createElement('div', {className: 'ContactView'},
+			React.createElement('h1', {className: 'ContactView-title'}, "Contacts"),
+			React.createElement('ul', {className: 'ContactView-list'},
 				this.props.contacts.filter(function(contact) { return contact.email; })
 				.map(function(contact) { return React.createElement(ContactItem, contact); })
 			),
