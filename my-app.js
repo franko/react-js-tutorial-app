@@ -38,15 +38,27 @@ var ContactForm = React.createClass({
 	}
 });
 
+var ContactView = React.createClass({
+	propTypes: {
+		contacts: React.PropTypes.array.isRequired,
+		newContact: React.PropTypes.object.isRequired,
+	},
+
+	render: function() {
+		return React.createElement('div', {},
+			React.createElement('h1', {}, "Contacts"),
+			React.createElement('ul', {},
+				this.props.contacts.filter(function(contact) { return contact.email; })
+				.map(function(contact) { return React.createElement(ContactItem, contact); })
+			),
+			React.createElement(ContactForm, {contact: newContact})
+		);
+	},
+});
+
 var contactItemsElements = contacts
 	.filter(function(contact) { return contact.email; })
 	.map(function(contact) { return React.createElement(ContactItem, contact); });
 
-var rootElement =
-	React.createElement('div', {},
-		React.createElement('h1', {}, "Contacts"),
-		React.createElement('ul', {}, contactItemsElements),
-		React.createElement(ContactForm, {contact: newContact})
-	);
-
+var rootElement = React.createElement(ContactView, {contacts: contacts, newContact: newContact});
 ReactDOM.render(rootElement, document.getElementById('react-app'))
