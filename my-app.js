@@ -1,11 +1,3 @@
-var contacts = [
-    {key: 1, name: "James K Nelson", email: "james@jamesknelson.com", description: "Front-end Unicorn"},
-    {key: 2, name: "Jim", email: "jim@example.com"},
-    {key: 3, name: "Joe"},
-]
-
-var newContact = {name: "", email: "", description: ""}
-
 var ContactItem = React.createClass({
 	propTypes: {
 		name: React.PropTypes.string.isRequired,
@@ -28,28 +20,34 @@ var ContactForm = React.createClass({
         onFormChange: React.PropTypes.func.isRequired,
 	},
 
+    onNameChange: function(e) {
+        this.props.onFormChange(Object.assign({}, this.props.value, {name: e.target.value}));
+    },
+
+    onEmailChange: function(e) {
+        this.props.onFormChange(Object.assign({}, this.props.value, {email: e.target.value}));
+    },
+
+    onDescriptionChange: function(e) {
+        this.props.onFormChange(Object.assign({}, this.props.value, {description: e.target.value}));
+    },
+
 	render: function() {
 		var contact = this.props.value;
-        var change = this.props.onFormChange;
 		return React.createElement('form', {className: 'ContactForm'},
-			React.createElement('input', {type: 'text', placeholder: 'Name (required)', value: contact.name, onChange: function(e) { change(Object.assign({}, contact, {name: e.target.value})); }}),
-			React.createElement('input', {type: 'email', placeholder: 'Email', value: contact.email, onChange: function(e) { change(Object.assign({}, contact, {email: e.target.value})); }}),
-			React.createElement('textarea', {placeholder: 'Description', value: contact.description, onChange: function(e) { change(Object.assign({}, contact, {description: e.target.value})); }}),
+			React.createElement('input', {type: 'text', placeholder: 'Name (required)', value: contact.name, onChange: this.onNameChange}),
+			React.createElement('input', {type: 'email', placeholder: 'Email', value: contact.email, onChange: this.onEmailChange}),
+			React.createElement('textarea', {placeholder: 'Description', value: contact.description, onChange: this.onDescriptionChange}),
 			React.createElement('button', {type: 'submit'}, 'Add Contact')
 		);
 	}
 });
 
-var renderState = function(xstate) {
-    var contactView = React.createElement(ContactView, xstate);
-    ReactDOM.render(contactView, document.getElementById('react-app'))
-};
-
 var ContactView = React.createClass({
 	propTypes: {
 		contacts: React.PropTypes.array.isRequired,
 		newContact: React.PropTypes.object.isRequired,
-        onStateChange: React.PropTypes.func.isRequired,
+        onNewContactChange: React.PropTypes.func.isRequired,
 	},
 
 	render: function() {
@@ -59,22 +57,27 @@ var ContactView = React.createClass({
 				this.props.contacts.filter(function(contact) { return contact.email; })
 				.map(function(contact) { return React.createElement(ContactItem, contact); })
 			),
-			React.createElement(ContactForm, {value: this.props.newContact, onFormChange: this.props.onStateChange})
+			React.createElement(ContactForm, {value: this.props.newContact, onFormChange: this.props.onNewContactChange})
 		);
 	},
 });
 
-var contactItemsElements = contacts
-	.filter(function(contact) { return contact.email; })
-	.map(function(contact) { return React.createElement(ContactItem, contact); });
+var state = {};
 
- var state = {
-     contacts: contacts,
-     newContact: newContact,
- };
+var updateState = function(changes) {
+    Object.assign(state, changes);
+    var contactView = React.createElement(ContactView, state);
+    ReactDOM.render(contactView, document.getElementById('react-app'))
+}
 
-state.onStateChange = function(currentContact) {
-    renderState(Object.assign(state, {newContact: currentContact}));
-};
-
-renderState(state);
+updateState({
+    contacts: [
+        {key: 1, name: "James K Nelson", email: "james@jamesknelson.com", description: "Front-end Unicorn"},
+        {key: 2, name: "Jim", email: "jim@example.com"},
+        {key: 3, name: "Joe"},
+    ],
+    newContact: {name: "", email: "", description: ""},
+    onNewContactChange: function(currentContact) {
+        updateState({newContact: currentContact});
+    },
+});
