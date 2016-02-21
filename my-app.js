@@ -24,24 +24,32 @@ var ContactItem = React.createClass({
 
 var ContactForm = React.createClass({
 	propTypes: {
-		contact: React.PropTypes.object.isRequired,
+		value: React.PropTypes.object.isRequired,
+        onFormChange: React.PropTypes.func.isRequired,
 	},
 
 	render: function() {
-		var contact = this.props.contact;
+		var contact = this.props.value;
+        var change = this.props.onFormChange;
 		return React.createElement('form', {className: 'ContactForm'},
-			React.createElement('input', {type: 'text', placeholder: 'Name (required)', value: contact.name}),
-			React.createElement('input', {type: 'email', placeholder: 'Email', value: contact.email}),
-			React.createElement('textarea', {placeholder: 'Description', value: contact.description}),
+			React.createElement('input', {type: 'text', placeholder: 'Name (required)', value: contact.name, onChange: function(e) { change(Object.assign({}, contact, {name: e.target.value})); }}),
+			React.createElement('input', {type: 'email', placeholder: 'Email', value: contact.email, onChange: function(e) { change(Object.assign({}, contact, {email: e.target.value})); }}),
+			React.createElement('textarea', {placeholder: 'Description', value: contact.description, onChange: function(e) { change(Object.assign({}, contact, {description: e.target.value})); }}),
 			React.createElement('button', {type: 'submit'}, 'Add Contact')
 		);
 	}
 });
 
+var renderState = function(xstate) {
+    var contactView = React.createElement(ContactView, xstate);
+    ReactDOM.render(contactView, document.getElementById('react-app'))
+};
+
 var ContactView = React.createClass({
 	propTypes: {
 		contacts: React.PropTypes.array.isRequired,
 		newContact: React.PropTypes.object.isRequired,
+        onStateChange: React.PropTypes.func.isRequired,
 	},
 
 	render: function() {
@@ -51,7 +59,7 @@ var ContactView = React.createClass({
 				this.props.contacts.filter(function(contact) { return contact.email; })
 				.map(function(contact) { return React.createElement(ContactItem, contact); })
 			),
-			React.createElement(ContactForm, {contact: newContact})
+			React.createElement(ContactForm, {value: this.props.newContact, onFormChange: this.props.onStateChange})
 		);
 	},
 });
@@ -60,5 +68,13 @@ var contactItemsElements = contacts
 	.filter(function(contact) { return contact.email; })
 	.map(function(contact) { return React.createElement(ContactItem, contact); });
 
-var rootElement = React.createElement(ContactView, {contacts: contacts, newContact: newContact});
-ReactDOM.render(rootElement, document.getElementById('react-app'))
+ var state = {
+     contacts: contacts,
+     newContact: newContact,
+ };
+
+state.onStateChange = function(currentContact) {
+    renderState(Object.assign(state, {newContact: currentContact}));
+};
+
+renderState(state);
