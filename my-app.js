@@ -40,10 +40,27 @@ var ContactForm = React.createClass({
 
     render: function() {
         var contact = this.props.value;
+        var errors = contact.errors || {};
         return React.createElement('form', {className: 'ContactForm', onSubmit: this.onFormSubmit},
-            React.createElement('input', {type: 'text', placeholder: 'Name (required)', value: contact.name, onChange: this.onNameChange}),
-            React.createElement('input', {type: 'email', placeholder: 'Email', value: contact.email, onChange: this.onEmailChange}),
-            React.createElement('textarea', {placeholder: 'Description', value: contact.description, onChange: this.onDescriptionChange}),
+            React.createElement('input', {
+                type: 'text',
+                placeholder: 'Name (required)',
+                value: contact.name,
+                onChange: this.onNameChange,
+                className: errors.name && 'ContactForm-error',
+            }),
+            React.createElement('input', {
+                type: 'email',
+                placeholder: 'Email',
+                value: contact.email,
+                onChange: this.onEmailChange,
+                className: errors.email && 'ContactForm-error',
+            }),
+            React.createElement('textarea', {
+                placeholder: 'Description',
+                value: contact.description,
+                onChange: this.onDescriptionChange
+            }),
             React.createElement('button', {type: 'submit'}, 'Add Contact')
         );
     }
@@ -77,6 +94,8 @@ var updateState = function(changes) {
     ReactDOM.render(contactView, document.getElementById('react-app'))
 }
 
+var CONTACT_TEMPLATE = {name: "", email: "", description: "", errors: null}
+
 updateState({
     contacts: [
         {key: 1, name: "James K Nelson", email: "james@jamesknelson.com", description: "Front-end Unicorn"},
@@ -84,7 +103,7 @@ updateState({
         {key: 3, name: "Joe"},
     ],
 
-    newContact: {name: "", email: "", description: ""},
+    newContact: CONTACT_TEMPLATE,
 
     onNewContactChange: function(currentContact) {
         updateState({newContact: currentContact});
@@ -92,10 +111,19 @@ updateState({
 
     submitNewContact: function() {
         var newContact = state.newContact;
-        if (newContact.email !== "") {
+        if (newContact.name !== "" && newContact.email !== "") {
             var contacts = state.contacts;
             contacts.push(Object.assign({}, newContact, {key: contacts.length + 1}));
-            updateState({contacts: contacts, newContact: {name: "", email: "", description: ""}});
+            updateState({contacts: contacts, newContact: CONTACT_TEMPLATE});
+        } else {
+            var errors = {};
+            if (newContact.name === "") {
+                errors.name = "The name is required";
+            }
+            if (newContact.email === "") {
+                errors.email = "The email is required";
+            }
+            updateState({newContact: Object.assign(newContact, {errors: errors})});
         }
     },
 });
