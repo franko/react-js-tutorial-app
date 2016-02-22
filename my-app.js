@@ -18,7 +18,13 @@ var ContactForm = React.createClass({
 	propTypes: {
 		value: React.PropTypes.object.isRequired,
         onFormChange: React.PropTypes.func.isRequired,
+        submitNewContact: React.PropTypes.func.isRequired,
 	},
+
+    onFormSubmit: function(e) {
+        e.preventDefault();
+        this.props.submitNewContact();
+    },
 
     onNameChange: function(e) {
         this.props.onFormChange(Object.assign({}, this.props.value, {name: e.target.value}));
@@ -34,7 +40,7 @@ var ContactForm = React.createClass({
 
 	render: function() {
 		var contact = this.props.value;
-		return React.createElement('form', {className: 'ContactForm'},
+		return React.createElement('form', {className: 'ContactForm', onSubmit: this.onFormSubmit},
 			React.createElement('input', {type: 'text', placeholder: 'Name (required)', value: contact.name, onChange: this.onNameChange}),
 			React.createElement('input', {type: 'email', placeholder: 'Email', value: contact.email, onChange: this.onEmailChange}),
 			React.createElement('textarea', {placeholder: 'Description', value: contact.description, onChange: this.onDescriptionChange}),
@@ -48,6 +54,7 @@ var ContactView = React.createClass({
 		contacts: React.PropTypes.array.isRequired,
 		newContact: React.PropTypes.object.isRequired,
         onNewContactChange: React.PropTypes.func.isRequired,
+        submitNewContact: React.PropTypes.func.isRequired,
 	},
 
 	render: function() {
@@ -57,7 +64,7 @@ var ContactView = React.createClass({
 				this.props.contacts.filter(function(contact) { return contact.email; })
 				.map(function(contact) { return React.createElement(ContactItem, contact); })
 			),
-			React.createElement(ContactForm, {value: this.props.newContact, onFormChange: this.props.onNewContactChange})
+			React.createElement(ContactForm, {value: this.props.newContact, onFormChange: this.props.onNewContactChange, submitNewContact: this.props.submitNewContact})
 		);
 	},
 });
@@ -76,8 +83,19 @@ updateState({
         {key: 2, name: "Jim", email: "jim@example.com"},
         {key: 3, name: "Joe"},
     ],
+
     newContact: {name: "", email: "", description: ""},
+
     onNewContactChange: function(currentContact) {
         updateState({newContact: currentContact});
+    },
+
+    submitNewContact: function() {
+        var newContact = state.newContact;
+        if (newContact.email !== "") {
+            var contacts = state.contacts;
+            contacts.push(Object.assign({}, newContact, {key: contacts.length + 1}));
+            updateState({contacts: contacts, newContact: {name: "", email: "", description: ""}});
+        }
     },
 });
